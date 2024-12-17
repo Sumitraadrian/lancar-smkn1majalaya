@@ -27,20 +27,27 @@ SET time_zone = "+00:00";
 -- Table structure for table `angkatan`
 --
 
-CREATE TABLE `angkatan` (
+CREATE TABLE `kelas` (
   `id` int(11) NOT NULL,
-  `tahun` int(11) NOT NULL
+  `kelas` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `angkatan`
 --
 
-INSERT INTO `angkatan` (`id`, `tahun`) VALUES
-(1, 2019),
-(2, 2020),
-(3, 2021),
-(4, 2022);
+INSERT INTO `kelas` (`id`, `kelas`) VALUES
+(1, 'X-TKJ 1'),
+(2, 'X-TKJ 2'),
+(3, 'X-TKJ 3'),
+(4, 'XI-TKJ 1'),
+(5, 'XI-TKJ 2'),
+(6, 'XI-TKJ 3'),
+(7, 'XI-TKJ 2'),
+(8, 'XII-TKJ 1'),
+(9, 'XII-TKJ 2'),
+(10, 'XII-TKJ 3');
+
 
 -- --------------------------------------------------------
 
@@ -48,9 +55,9 @@ INSERT INTO `angkatan` (`id`, `tahun`) VALUES
 -- Table structure for table `dosen`
 --
 
-CREATE TABLE `dosen` (
+CREATE TABLE `guru_piket` (
   `id` int(11) NOT NULL,
-  `nama_dosen` varchar(100) NOT NULL,
+  `nama_guru` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
   `nip` varchar(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -59,9 +66,9 @@ CREATE TABLE `dosen` (
 -- Dumping data for table `dosen`
 --
 
-INSERT INTO `dosen` (`id`, `nama_dosen`, `email`, `nip`) VALUES
-(1, 'Dr. Bambang Sudibyo', 'bambang@univ.ac.id', '197505021993021001'),
-(2, 'Dr. Maria Indriati', 'maria@univ.ac.id', '198008152005012001');
+INSERT INTO `guru_piket` (`id`, `nama_guru`, `email`, `nip`) VALUES
+(1, 'Dr. Bambang Sudibyo', 'bambang@smk.sch.id', '197505021993021001'),
+(2, 'Dr. Maria Indriati', 'maria@smk.sch.id', '198008152005012001');
 
 -- --------------------------------------------------------
 
@@ -72,8 +79,8 @@ INSERT INTO `dosen` (`id`, `nama_dosen`, `email`, `nip`) VALUES
 CREATE TABLE `pengajuan` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `angkatan_id` int(11) DEFAULT NULL,
-  `dosen_id` int(11) DEFAULT NULL,
+  `kelas_id` int(11) DEFAULT NULL,
+  `guru_piket_id` int(11) DEFAULT NULL,
   `alasan` text NOT NULL,
   `tanggal_pengajuan` date NOT NULL,
   `dokumen_lampiran` varchar(255) DEFAULT NULL,
@@ -82,29 +89,16 @@ CREATE TABLE `pengajuan` (
   `keputusan_admin` text DEFAULT NULL,
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `nama_lengkap` varchar(255) NOT NULL,
-  `nim` varchar(50) NOT NULL,
-  `angkatan` varchar(4) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `jurusan` varchar(100) NOT NULL
+  `nis` varchar(50) NOT NULL,
+  `kelas` varchar(4) NOT NULL,
+  `email` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `pengajuan`
 --
 
-INSERT INTO `pengajuan` (`id`, `user_id`, `angkatan_id`, `dosen_id`, `alasan`, `tanggal_pengajuan`, `dokumen_lampiran`, `status`, `tanggal_disetujui`, `keputusan_admin`, `updated_at`, `nama_lengkap`, `nim`, `angkatan`, `email`, `jurusan`) VALUES
-(1, 1, NULL, NULL, 'gfgfg', '0000-00-00', '', 'pending', NULL, NULL, '2024-10-28 04:33:42', 'adrian', '12345', '2021', 'sumitraadriansyah@gmail.com', ''),
-(2, 1, NULL, NULL, 'izin', '2024-10-11', '2022-06-21.png', 'disetujui', NULL, NULL, '2024-10-28 06:28:10', 'sumitra', '123456', '2021', 'sumitraadriansyah@gmail.com', ''),
-(3, 2, NULL, NULL, 'izin', '2024-10-11', '2022-06-21.png', 'disetujui', NULL, NULL, '2024-10-28 06:47:17', 'sumitra', '123456', '2021', 'sumitraadriansyah@gmail.com', ''),
-(4, 2, NULL, NULL, 'izin', '2024-11-11', '2022-06-28 (1).png', 'disetujui', NULL, NULL, '2024-10-28 06:41:33', 'adrian', '12345', '2021', 'sumitraadriansyah@gmail.com', 'Teknik Elektro'),
-(5, 2, NULL, NULL, 'izin karena keperluan orang tua', '2024-05-11', '', 'disetujui', NULL, NULL, '2024-10-28 06:36:32', 'sumitra', '123456', '2021', 'mondardi@gmail.com', 'Teknik Informatika'),
-(6, 2, NULL, NULL, 'izin', '2024-10-30', '', 'disetujui', NULL, NULL, '2024-10-28 06:16:36', 'adrian', '123456', '2021', 'mondardi@gmail.com', 'Teknik Informatika'),
-(7, 2, NULL, NULL, 'izin', '2024-10-31', '', 'pending', NULL, NULL, '2024-10-28 04:56:16', 'sumitra', '123456', '2021', 'sumitraadriansyahmuhammad25@gmail.com', 'Biologi'),
-(8, 2, NULL, NULL, 'izin', '2024-10-31', '', 'disetujui', NULL, NULL, '2024-10-28 06:55:48', 'adrian', '12345', '2021', 'adriansyahsumitra@gmail.com', 'Teknik Elektro'),
-(9, 2, NULL, NULL, 'hjhdghnkgfn', '2024-10-28', '', 'disetujui', NULL, NULL, '2024-10-28 05:57:26', 'sumitra', '123456', '2021', 'sumitraadriansyahmuhammad25@gmail.com', 'Teknik Informatika'),
-(10, 2, NULL, NULL, 'ubjv', '2024-10-28', '', 'disetujui', NULL, NULL, '2024-10-28 06:11:15', 'sumitra', '12345', '2021', 'mondardi@gmail.com', 'Teknik Informatika'),
-(11, 2, NULL, NULL, 'izin', '2024-10-31', '', 'disetujui', NULL, NULL, '2024-10-28 06:19:49', 'Sumitra Adriansyah', '1217050137', '2021', 'sumitraadriansyah@gmail.com', 'Teknik Informatika'),
-(12, 2, NULL, NULL, 'izin', '2024-10-31', '', 'disetujui', NULL, NULL, '2024-10-28 06:50:54', 'Sumitra Adriansyah', '1217050137', '2021', 'mondardi@gmail.com', 'Teknik Informatika');
+
 
 -- --------------------------------------------------------
 
@@ -116,7 +110,7 @@ CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
   `password` varchar(100) NOT NULL,
-  `role` enum('mahasiswa','admin') DEFAULT 'mahasiswa',
+  `role` enum('siswa','admin') DEFAULT 'siswa',
   `email` varchar(100) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -126,7 +120,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `password`, `role`, `email`, `created_at`) VALUES
-(1, 'mahasiswa1', '12345', 'mahasiswa', 'mahasiswa1@univ.ac.id', '2024-10-27 17:35:12'),
+(1, 'siswa1', '12345', 'siswa', 'mahasiswa1@univ.ac.id', '2024-10-27 17:35:12'),
 (2, 'admin1', 'admin123', 'admin', 'admin@univ.ac.id', '2024-10-27 17:35:12');
 
 --
@@ -136,13 +130,13 @@ INSERT INTO `users` (`id`, `username`, `password`, `role`, `email`, `created_at`
 --
 -- Indexes for table `angkatan`
 --
-ALTER TABLE `angkatan`
+ALTER TABLE `kelas`
   ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `dosen`
 --
-ALTER TABLE `dosen`
+ALTER TABLE `guru_piket`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -151,8 +145,8 @@ ALTER TABLE `dosen`
 ALTER TABLE `pengajuan`
   ADD PRIMARY KEY (`id`),
   ADD KEY `user_id` (`user_id`),
-  ADD KEY `angkatan_id` (`angkatan_id`),
-  ADD KEY `dosen_id` (`dosen_id`);
+  ADD KEY `kelas_id` (`kelas_id`),
+  ADD KEY `guru_piket_id` (`guru_piket_id`);
 
 --
 -- Indexes for table `users`
@@ -167,13 +161,13 @@ ALTER TABLE `users`
 --
 -- AUTO_INCREMENT for table `angkatan`
 --
-ALTER TABLE `angkatan`
+ALTER TABLE `kelas`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `dosen`
 --
-ALTER TABLE `dosen`
+ALTER TABLE `guru_piket`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
@@ -197,8 +191,8 @@ ALTER TABLE `users`
 --
 ALTER TABLE `pengajuan`
   ADD CONSTRAINT `pengajuan_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `pengajuan_ibfk_2` FOREIGN KEY (`angkatan_id`) REFERENCES `angkatan` (`id`),
-  ADD CONSTRAINT `pengajuan_ibfk_3` FOREIGN KEY (`dosen_id`) REFERENCES `dosen` (`id`);
+  ADD CONSTRAINT `pengajuan_ibfk_2` FOREIGN KEY (`kelas_id`) REFERENCES `kelas` (`id`),
+  ADD CONSTRAINT `pengajuan_ibfk_3` FOREIGN KEY (`guru_piket_id`) REFERENCES `guru_piket` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

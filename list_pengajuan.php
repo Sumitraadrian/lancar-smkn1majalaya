@@ -28,7 +28,7 @@ if (isset($_GET['delete_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SUDISMA - Dispensasi</title>
+    <title>LANCAR - Dispensasi</title>
     <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <!-- DataTables CSS -->
@@ -167,7 +167,7 @@ if (isset($_GET['delete_id'])) {
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <a class="navbar-brand text-black" href="#">SUDISMA</a>
+        <a class="navbar-brand text-black" href="#">LANCAR</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -182,10 +182,10 @@ if (isset($_GET['delete_id'])) {
 
     <!-- Sidebar -->
    <!-- Sidebar -->
-    <div class="sidebar bg-light p-3" id="sidebar">
+   <div class="sidebar bg-light p-3" id="sidebar">
         <h4 class="text-center">SUDISMA</h4>
         <div style="height: 40px;"></div>
-        <small class="text-muted ms-2">Menu</small>
+        <small class="text-muted ms-2" style="margin-top: 80px;">Menu</small>
         <nav class="nav flex-column mt-2">
             <a class="nav-link active d-flex align-items-center text-dark" href="dashboard_admin.php" style="color: black;">
                 <i class="bi bi-speedometer2 me-2"></i> Dashboard
@@ -194,10 +194,10 @@ if (isset($_GET['delete_id'])) {
                 <i class="bi bi-file-earmark-text me-2"></i> Dispensasi
             </a>
             <a class="nav-link d-flex align-items-center text-dark" href="list_angkatan.php" style="color: black;">
-                <i class="bi bi-file-earmark-text me-2"></i> Angkatan
+                <i class="bi bi-file-earmark-text me-2"></i> Kelas
             </a>
             <a class="nav-link d-flex align-items-center text-dark" href="list_dosen.php" style="color: black;">
-                <i class="bi bi-file-earmark-text me-2"></i> Dosen Penyetuju
+                <i class="bi bi-file-earmark-text me-2"></i> Guru Piket
             </a>
             <a class="nav-link d-flex align-items-center text-dark" href="list_tanggal.php" style="color: black;">
                 <i class="bi bi-file-earmark-text me-2"></i> Tanggal Pengajuan
@@ -217,10 +217,11 @@ if (isset($_GET['delete_id'])) {
                             <tr>
                                 <th>#</th>
                                 <th>Nama Lengkap</th>
-                                <th>NIM</th>
-                                <th>Angkatan</th>
+                                <th>NIS</th>
+                                <th>Kelas</th>
                                 <th>Alasan</th>
-                                <th>Tanggal Pengajuan</th>
+                                <th>Tanggal Mulai Dispensasi</th>
+                                <th>Tanggal Akhir Dispensasi</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
@@ -231,10 +232,11 @@ if (isset($_GET['delete_id'])) {
                             <tr>
                                 <td class="text-center"><?= $no++; ?></td>
                                 <td><?= htmlspecialchars($row['nama_lengkap']); ?></td>
-                                <td><?= htmlspecialchars($row['nim']); ?></td>
-                                <td class="text-center"><?= htmlspecialchars($row['angkatan']); ?></td>
+                                <td><?= htmlspecialchars($row['nis']); ?></td>
+                                <td class="text-center"><?= htmlspecialchars($row['kelas']); ?></td>
                                 <td><?= htmlspecialchars($row['alasan']); ?></td>
                                 <td class="text-center"><?= htmlspecialchars($row['tanggal_pengajuan']); ?></td>
+                                <td class="text-center"><?= htmlspecialchars($row['tanggal_akhir']); ?></td>
                                 <td class="text-center">
                                     <?php if ($row['status'] == 'pending'): ?>
                                         <span class="status-badge status-belum-diproses">Belum diproses</span>

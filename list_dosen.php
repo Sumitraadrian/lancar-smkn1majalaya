@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
-$query = "SELECT nama_dosen, email, nip FROM dosen";
+$query = "SELECT nama_guru, email, nip FROM guru_piket";
 $result = $conn->query($query);
 ?>
 
@@ -170,7 +170,7 @@ $result = $conn->query($query);
     <div class="sidebar bg-light p-3" id="sidebar">
         <h4 class="text-center">SUDISMA</h4>
         <div style="height: 40px;"></div>
-        <small class="text-muted ms-2">Menu</small>
+        <small class="text-muted ms-2" style="margin-top: 80px;">Menu</small>
         <nav class="nav flex-column mt-2">
             <a class="nav-link active d-flex align-items-center text-dark" href="dashboard_admin.php" style="color: black;">
                 <i class="bi bi-speedometer2 me-2"></i> Dashboard
@@ -179,10 +179,10 @@ $result = $conn->query($query);
                 <i class="bi bi-file-earmark-text me-2"></i> Dispensasi
             </a>
             <a class="nav-link d-flex align-items-center text-dark" href="list_angkatan.php" style="color: black;">
-                <i class="bi bi-file-earmark-text me-2"></i> Angkatan
+                <i class="bi bi-file-earmark-text me-2"></i> Kelas
             </a>
             <a class="nav-link d-flex align-items-center text-dark" href="list_dosen.php" style="color: black;">
-                <i class="bi bi-file-earmark-text me-2"></i> Dosen Penyetuju
+                <i class="bi bi-file-earmark-text me-2"></i> Guru Piket
             </a>
             <a class="nav-link d-flex align-items-center text-dark" href="list_tanggal.php" style="color: black;">
                 <i class="bi bi-file-earmark-text me-2"></i> Tanggal Pengajuan
@@ -196,15 +196,21 @@ $result = $conn->query($query);
     <div class="main-content" id="content">
         <div class="container mt-5">
             <div class="table-container">
-                <div class="header-title">List Dosen Penyetuju</div>
+               
+                <div class="header-title">
+                    List Data Guru Piket
+                    <a href="#" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#tambahGuruModal" style="float: right; margin-bottom: 10px;">Tambah Guru Piket</a>
+
+                </div>
                 <div class="table-responsive">
                     <table id="dosenTable" class="table table-bordered table-hover">
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Nama Dosen</th>
+                                <th>Nama Guru Piket</th>
                                 <th>NIP</th>
                                 <th>Email</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -212,7 +218,7 @@ $result = $conn->query($query);
                             <?php while ($row = $result->fetch_assoc()): ?>
                             <tr>
                                 <td class="text-center"><?= $no++; ?></td>
-                                <td><?= htmlspecialchars($row['nama_dosen']); ?></td>
+                                <td><?= htmlspecialchars($row['nama_guru']); ?></td>
                                 <td><?= $row['nip'] ? htmlspecialchars($row['nip']) : 'N/A'; ?></td>
                                 <td><?= htmlspecialchars($row['email']); ?></td>
                             </tr>
@@ -222,7 +228,68 @@ $result = $conn->query($query);
                 </div>
             </div>
         </div>
-
+<!-- Modal Tambah Kelas -->
+<div class="modal fade" id="tambahGuruModal" tabindex="-1" aria-labelledby="tambahGuruModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tambahGuruModalLabel">Tambah Kelas</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="tambahKelasForm">
+                    <div class="form-group">
+                        <label for="kelas">Nama Guru Piket</label>
+                        <input type="text" id="guru" name="guru" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="kelas">NIP</label>
+                        <input type="text" id="nip" name="nip" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="kelas">Email</label>
+                        <input type="text" id="email" name="email" class="form-control" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                        <button type="submit" class="btn btn-success">Simpan</button>
+                    </div>
+                </form>
+                <div id="error-message" class="text-danger mt-2" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Edit Kelas -->
+<!-- Modal Edit Kelas -->
+<div class="modal fade" id="editKelasModal" tabindex="-1" aria-labelledby="editKelasModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editKelasModalLabel">Edit Kelas</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editKelasForm">
+                    <div class="form-group">
+                        <label for="editKelas">Nama Kelas</label>
+                        <input type="text" id="editKelas" name="kelas" class="form-control" required>
+                        <input type="hidden" id="editKelasId" name="id">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                        <button type="submit" class="btn btn-success">Simpan</button>
+                    </div>
+                </form>
+                <div id="edit-error-message" class="text-danger mt-2" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
         <!-- jQuery -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <!-- DataTables JS -->
@@ -253,6 +320,14 @@ $result = $conn->query($query);
                 document.getElementById("sidebar").classList.toggle("collapsed");
                 document.getElementById("content").classList.toggle("expanded");
             });
+
+            function openModal() {
+    document.getElementById('tambahGuruModal').style.display = 'block';
+}
+
+function closeModal() {
+    document.getElementById('tambahGuruModal').style.display = 'none';
+}
         </script>
     </body>
 </html>

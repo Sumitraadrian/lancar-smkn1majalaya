@@ -25,11 +25,12 @@ $dataTerbaru = $resultDataTerbaru->fetch_assoc()['total'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SUDISMA - Dashboard</title>
+    <title>Lancar - Dashboard</title>
     <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" type="image/png" href="image/logowebsite.png">
     <script src="https://kit.fontawesome.com/YOUR_KIT_CODE.js" crossorigin="anonymous"></script>
     <style>
         body {
@@ -91,7 +92,7 @@ $dataTerbaru = $resultDataTerbaru->fetch_assoc()['total'];
             width: calc(100% - 250px); /* Set to adjust with sidebar width */
             padding: 120px;
             border-radius: 0;
-            background-color: #4472c4;
+            background: linear-gradient(to right, #63baef, #1e4b8a); /* Gradasi warna dari biru muda ke biru gelap */
             margin-left: 0px;
             color: white;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -101,6 +102,7 @@ $dataTerbaru = $resultDataTerbaru->fetch_assoc()['total'];
             justify-content: space-between;
             display: flex;
         }
+
         .main-content {
             margin-left: 250px;
             padding: 20px;
@@ -108,29 +110,29 @@ $dataTerbaru = $resultDataTerbaru->fetch_assoc()['total'];
             min-height: calc(100vh - 56px); 
         }
         .welcome-card {
-    background-color: #ffffff;
-    padding: 0px; /* Keep padding at 0 if you want it compact */
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin-top: -240px; /* Use a negative margin to pull it up */
-    display: flex;
-    margin-right: 90px;
-    justify-content: space-between;
-    position: relative; /* Keep it as relative to maintain flow */
-    left: 0; /* Reset left positioning */
-    z-index: 1; /* Ensure it stays above other elements */
-    width: calc(100% - 40px); /* Full width minus padding */
-    transition: all 0.3s ease; /* Smooth transition for width changes */
-}
+            background-color: #ffffff;
+            padding: 0px; /* Keep padding at 0 if you want it compact */
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: -240px; /* Use a negative margin to pull it up */
+            display: flex;
+            margin-right: 90px;
+            justify-content: space-between;
+            position: relative; /* Keep it as relative to maintain flow */
+            left: 0; /* Reset left positioning */
+            z-index: 1; /* Ensure it stays above other elements */
+            width: calc(100% - 40px); /* Full width minus padding */
+            transition: all 0.3s ease; /* Smooth transition for width changes */
+        }
 
-/* Specific adjustments when the sidebar is collapsed */
-.sidebar.collapsed ~ .welcome-card {
-    margin-left: 0; /* Remove left margin */
-    width: calc(100% - 30px); /* Adjust width to fit the container with some padding */
-    position: relative; /* Ensure it flows with the document */
-    left: 0; /* Reset left position */
-    margin-top: -50px; /* Keep negative margin when sidebar is collapsed */
-}
+        /* Specific adjustments when the sidebar is collapsed */
+        .sidebar.collapsed ~ .welcome-card {
+            margin-left: 0; /* Remove left margin */
+            width: calc(100% - 30px); /* Adjust width to fit the container with some padding */
+            position: relative; /* Ensure it flows with the document */
+            left: 0; /* Reset left position */
+            margin-top: -50px; /* Keep negative margin when sidebar is collapsed */
+        }
 
 
 
@@ -163,10 +165,14 @@ $dataTerbaru = $resultDataTerbaru->fetch_assoc()['total'];
             flex-grow: 1;
         }
         .info-card-primary {
-            background-color: #4a90e2;
+            background: linear-gradient(to right,  #428148,rgb(38, 83, 43));
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            
         }
         .info-card-warning {
             background-color: #f5a623;
+            background: linear-gradient(to right,  #f5a623,rgb(199, 123, 0));
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .navbar {
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -213,8 +219,8 @@ $dataTerbaru = $resultDataTerbaru->fetch_assoc()['total'];
             color: #f8f9fa;
         }
         .welcome-card img {
-            width: 180px; /* Set the desired width */
-            height: 180px; /* Set the desired height */
+            width: 150px; /* Set the desired width */
+            height: 150px; /* Set the desired height */
              /* Optional: make the image circular */
             object-fit: cover; /* Maintain aspect ratio and crop if needed */
             margin-right: 40px;
@@ -232,7 +238,7 @@ $dataTerbaru = $resultDataTerbaru->fetch_assoc()['total'];
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <a class="navbar-brand text-black" href="#">SUDISMA</a>
+        <a class="navbar-brand text-black" href="#">LANCAR</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -243,10 +249,6 @@ $dataTerbaru = $resultDataTerbaru->fetch_assoc()['total'];
         </div>
     </div>
 </nav>
-
-
-    <!-- Sidebar -->
-   <!-- Sidebar -->
     <div class="sidebar bg-light p-3" id="sidebar">
         <h4 class="text-center">SUDISMA</h4>
         <div style="height: 40px;"></div>
@@ -259,13 +261,16 @@ $dataTerbaru = $resultDataTerbaru->fetch_assoc()['total'];
                 <i class="bi bi-file-earmark-text me-2"></i> Dispensasi
             </a>
             <a class="nav-link d-flex align-items-center text-dark" href="list_angkatan.php" style="color: black;">
-                <i class="bi bi-file-earmark-text me-2"></i> Angkatan
+                <i class="bi bi-file-earmark-text me-2"></i> Kelas
             </a>
             <a class="nav-link d-flex align-items-center text-dark" href="list_dosen.php" style="color: black;">
-                <i class="bi bi-file-earmark-text me-2"></i> Dosen Penyetuju
+                <i class="bi bi-file-earmark-text me-2"></i> Guru Piket
             </a>
             <a class="nav-link d-flex align-items-center text-dark" href="list_tanggal.php" style="color: black;">
                 <i class="bi bi-file-earmark-text me-2"></i> Tanggal Pengajuan
+            </a>
+            <a class="nav-link d-flex align-items-center text-dark" href="riwayat_pengajuan.php" style="color: black;">
+                <i class="bi bi-file-earmark-text me-2"></i> Riwayat Pengajuan
             </a>
             <a class="nav-link d-flex align-items-center text-dark" href="logout.php" style="color: black;">
                 <i class="bi bi-box-arrow-right me-2"></i> Logout
@@ -302,19 +307,17 @@ $dataTerbaru = $resultDataTerbaru->fetch_assoc()['total'];
         
     <!-- Main content -->
     <div class="main-content" id="content">
-        
-
         <!-- Welcome Card -->
         <div class="welcome-card" id="card">
             <div>
                 <h4>Selamat Datang Admin</h4>
                 <p>Di Website Aplikasi Surat Izin Dispensasi</p>
             </div>
-            <img src="image/image.png" alt="User Image">
+            <img src="image/logowebsite.png" alt="User Image">
         </div>
 
         <!-- Information Cards -->
-        <<!-- Information Cards -->
+        <!-- Information Cards -->
 <div class="row mt-4">
     <div class="col-md-6">
         <div class="info-card info-card-primary">

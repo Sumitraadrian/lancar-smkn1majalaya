@@ -7,8 +7,11 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
-$query = "SELECT DISTINCT angkatan FROM pengajuan";
+$query = "SELECT * FROM kelas ORDER BY kelas ASC";
 $result = $conn->query($query);
+
+
+
 ?>
 
 <!DOCTYPE html>
@@ -16,7 +19,7 @@ $result = $conn->query($query);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SUDISMA - Angkatan</title>
+    <title>LANCAR - Kelas</title>
     <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <!-- DataTables CSS -->
@@ -155,7 +158,7 @@ $result = $conn->query($query);
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <a class="navbar-brand text-black" href="#">SUDISMA</a>
+        <a class="navbar-brand text-black" href="#">LANCAR</a>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <!-- Tambahkan menu lain di sini jika diperlukan -->
@@ -166,29 +169,46 @@ $result = $conn->query($query);
 
     <!-- Sidebar -->
     <div class="sidebar bg-light p-3" id="sidebar">
-        <h4 class="text-center">SUDISMA</h4>
+        <h4 class="text-center">LANCAR</h4>
         <div style="height: 40px;"></div>
-        <small class="text-muted ms-2">Menu</small>
+        <small class="text-muted ms-2" style="margin-top: 80px;">Menu</small>
         <nav class="nav flex-column mt-2">
-            <a class="nav-link active d-flex align-items-center text-dark" href="dashboard_admin.php">Dashboard</a>
-            <a class="nav-link d-flex align-items-center text-dark" href="list_pengajuan.php">Dispensasi</a>
-            <a class="nav-link d-flex align-items-center text-dark" href="list_angkatan.php">Angkatan</a>
-            <a class="nav-link d-flex align-items-center text-dark" href="list_dosen.php">Dosen Penyetuju</a>
-            <a class="nav-link d-flex align-items-center text-dark" href="list_tanggal.php">Tanggal Pengajuan</a>
-            <a class="nav-link d-flex align-items-center text-dark" href="logout.php">Logout</a>
+            <a class="nav-link active d-flex align-items-center text-dark" href="dashboard_admin.php" style="color: black;">
+                <i class="bi bi-speedometer2 me-2"></i> Dashboard
+            </a>
+            <a class="nav-link d-flex align-items-center text-dark" href="list_pengajuan.php" style="color: black;">
+                <i class="bi bi-file-earmark-text me-2"></i> Dispensasi
+            </a>
+            <a class="nav-link d-flex align-items-center text-dark" href="list_angkatan.php" style="color: black;">
+                <i class="bi bi-file-earmark-text me-2"></i> Kelas
+            </a>
+            <a class="nav-link d-flex align-items-center text-dark" href="list_dosen.php" style="color: black;">
+                <i class="bi bi-file-earmark-text me-2"></i> Guru Piket
+            </a>
+            <a class="nav-link d-flex align-items-center text-dark" href="list_tanggal.php" style="color: black;">
+                <i class="bi bi-file-earmark-text me-2"></i> Tanggal Pengajuan
+            </a>
+            <a class="nav-link d-flex align-items-center text-dark" href="logout.php" style="color: black;">
+                <i class="bi bi-box-arrow-right me-2"></i> Logout
+            </a>
         </nav>
     </div>
 
     <div class="main-content" id="content">
         <div class="container mt-5">
             <div class="table-container">
-                <div class="header-title">List Data Angkatan</div>
+                <div class="header-title">
+                    List Data Kelas
+                    <a href="#" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#tambahKelasModal" style="float: right; margin-bottom: 10px;">Tambah Kelas</a>
+
+                </div>
                 <div class="table-responsive">
-                <table id="angkatanTable" class="table table-bordered table-hover">
+                <table id="kelasTable" class="table table-bordered table-hover">
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Angkatan</th>
+                            <th>Kelas</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -196,7 +216,7 @@ $result = $conn->query($query);
                         <?php while ($row = $result->fetch_assoc()): ?>
                         <tr>
                             <td class="text-center"><?= $no++; ?></td>
-                            <td><?= htmlspecialchars($row['angkatan']); ?></td>
+                            <td><?= htmlspecialchars($row['kelas']); ?></td>
                         </tr>
                         <?php endwhile; ?>
                     </tbody>
@@ -204,6 +224,61 @@ $result = $conn->query($query);
                 </div>
             </div>
         </div>
+<!-- Modal Tambah Kelas -->
+<div class="modal fade" id="tambahKelasModal" tabindex="-1" aria-labelledby="tambahKelasModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tambahKelasModalLabel">Tambah Kelas</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="tambahKelasForm">
+                    <div class="form-group">
+                        <label for="kelas">Nama Kelas</label>
+                        <input type="text" id="kelas" name="kelas" class="form-control" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                        <button type="submit" class="btn btn-success">Simpan</button>
+                    </div>
+                </form>
+                <div id="error-message" class="text-danger mt-2" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Edit Kelas -->
+<!-- Modal Edit Kelas -->
+<div class="modal fade" id="editKelasModal" tabindex="-1" aria-labelledby="editKelasModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editKelasModalLabel">Edit Kelas</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editKelasForm">
+                    <div class="form-group">
+                        <label for="editKelas">Nama Kelas</label>
+                        <input type="text" id="editKelas" name="kelas" class="form-control" required>
+                        <input type="hidden" id="editKelasId" name="id">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                        <button type="submit" class="btn btn-success">Simpan</button>
+                    </div>
+                </form>
+                <div id="edit-error-message" class="text-danger mt-2" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -213,7 +288,7 @@ $result = $conn->query($query);
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
     $(document).ready(function() {
-        $('#angkatanTable').DataTable({
+        $('#kelasTable').DataTable({
             "pagingType": "simple_numbers",
             "lengthMenu": [10, 25, 50, 100],
             "language": {
@@ -232,6 +307,107 @@ $result = $conn->query($query);
         document.getElementById("sidebar").classList.toggle("collapsed");
         document.getElementById("content").classList.toggle("expanded");
     });
+
+
+function openModal() {
+    document.getElementById('tambahKelasModal').style.display = 'block';
+}
+
+function closeModal() {
+    document.getElementById('tambahKelasModal').style.display = 'none';
+}
+$(document).ready(function() {
+    // Fungsi untuk memuat ulang data kelas dari server setelah kelas ditambahkan
+    function loadKelasTable() {
+        $.ajax({
+            url: 'loadkelas.php', // PHP file untuk memuat data dari database
+            type: 'GET',
+            success: function(response) {
+                $('#kelasTable tbody').html(response); // Update isi tabel dengan data baru
+            }
+        });
+    }
+
+    // Mengirim data form untuk ditambahkan ke database
+    $('#tambahKelasForm').on('submit', function(event) {
+        event.preventDefault(); // Menghentikan pengiriman form biasa
+
+        var kelas = $('#kelas').val(); // Ambil nilai kelas
+
+        $.ajax({
+            url: 'tambahKelas.php', // PHP file untuk menangani penambahan data
+            type: 'POST',
+            data: { kelas: kelas },
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    $('#error-message').hide();
+                    // Tutup modal
+                    $('#tambahKelasModal').modal('hide');
+                    // Bersihkan input
+                    $('#kelas').val('');
+                    // Tampilkan pesan sukses (opsional)
+                    alert(response.message);
+                    // Muat ulang data kelas
+                    loadKelasTable();
+                } else {
+                    $('#error-message').text(response.message).show();
+                }
+            },
+            error: function() {
+                $('#error-message').text('Terjadi kesalahan, coba lagi').show();
+            }
+        });
+    });
+
+    // Memuat data kelas pada saat pertama kali halaman dimuat
+    loadKelasTable();
+});
+$(document).ready(function() {
+    // Open the Edit Modal and populate with data
+    $('#kelasTable').on('click', '.btn-warning', function() {
+        var id = $(this).data('id');
+        var kelas = $(this).data('kelas');
+        
+        // Populate modal fields with data
+        $('#editKelasId').val(id);
+        $('#editKelas').val(kelas);
+    });
+
+    // Handle the edit form submission
+    $('#editKelasForm').on('submit', function(event) {
+        event.preventDefault();
+
+        var id = $('#editKelasId').val();
+        var kelas = $('#editKelas').val();
+
+        $.ajax({
+            url: 'editKelas.php', // PHP file to handle updating data
+            type: 'POST',
+            data: { id: id, kelas: kelas },
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    $('#error-message').hide();
+                    // Close the modal
+                    $('#editKelasModal').modal('hide');
+                    // Update the table with new data
+                    loadKelasTable();
+                    alert(response.message);
+                } else {
+                    $('#error-message').text(response.message).show();
+                }
+            },
+            error: function() {
+                $('#error-message').text('Terjadi kesalahan, coba lagi').show();
+            }
+        });
+    });
+     // Memuat data kelas pada saat pertama kali halaman dimuat
+     loadKelasTable();
+});
+
+
 </script>
 
 </body>

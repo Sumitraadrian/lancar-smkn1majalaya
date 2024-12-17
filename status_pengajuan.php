@@ -100,7 +100,7 @@ $result = $conn->query($query);
         <div style="height: 40px;"></div>
         <small class="text-muted ms-2">Menu</small>
         <nav class="nav flex-column mt-2">
-            <a class="nav-link active d-flex align-items-center text-dark" href="dashboard_mahasiswa.php" style="color: black;">
+            <a class="nav-link active d-flex align-items-center text-dark" href="dashboard_siswa.php" style="color: black;">
                 <i class="bi bi-speedometer2 me-2"></i> Dashboard
             </a>
             <a class="nav-link d-flex align-items-center text-dark" href="status_pengajuan.php" style="color: black;">
@@ -132,7 +132,8 @@ $result = $conn->query($query);
                 <thead class="thead-light">
                     <tr>
                         <th>No</th>
-                        <th>Tanggal Pengajuan</th>
+                        <th>Tanggal Mulai Dispensasi</th>
+                        <th>Tanggal Akhir Dispensasi</th>
                         <th>Alasan</th>
                         <th>Status</th>
                     </tr>
@@ -144,6 +145,7 @@ $result = $conn->query($query);
                             <tr>
                                 <td><?= $counter++; ?></td>
                                 <td><?= $row['tanggal_pengajuan']; ?></td>
+                                <td><?= $row['tanggal_akhir']; ?></td>
                                 <td><?= $row['alasan']; ?></td>
                                 <td>
                                     <span class="badge 

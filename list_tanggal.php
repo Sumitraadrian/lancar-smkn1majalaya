@@ -16,7 +16,7 @@ $result = $conn->query($query);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SUDISMA - Tanggal Pengajuan</title>
+    <title>LANCAR - Tanggal Pengajuan</title>
     <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <!-- DataTables CSS -->
@@ -166,9 +166,9 @@ $result = $conn->query($query);
 
     <!-- Sidebar -->
     <div class="sidebar bg-light p-3" id="sidebar">
-        <h4 class="text-center">SUDISMA</h4>
+        <h4 class="text-center">LANCAR</h4>
         <div style="height: 40px;"></div>
-        <small class="text-muted ms-2">Menu</small>
+        <small class="text-muted ms-2" style="margin-top: 80px;">Menu</small>
         <nav class="nav flex-column mt-2">
             <a class="nav-link active d-flex align-items-center text-dark" href="dashboard_admin.php" style="color: black;">
                 <i class="bi bi-speedometer2 me-2"></i> Dashboard
@@ -177,10 +177,10 @@ $result = $conn->query($query);
                 <i class="bi bi-file-earmark-text me-2"></i> Dispensasi
             </a>
             <a class="nav-link d-flex align-items-center text-dark" href="list_angkatan.php" style="color: black;">
-                <i class="bi bi-file-earmark-text me-2"></i> Angkatan
+                <i class="bi bi-file-earmark-text me-2"></i> Kelas
             </a>
             <a class="nav-link d-flex align-items-center text-dark" href="list_dosen.php" style="color: black;">
-                <i class="bi bi-file-earmark-text me-2"></i> Dosen Penyetuju
+                <i class="bi bi-file-earmark-text me-2"></i> Guru Piket
             </a>
             <a class="nav-link d-flex align-items-center text-dark" href="list_tanggal.php" style="color: black;">
                 <i class="bi bi-file-earmark-text me-2"></i> Tanggal Pengajuan

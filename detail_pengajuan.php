@@ -16,18 +16,17 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 // Fungsi untuk mengirim email konfirmasi
-function sendApprovalEmail($email, $nama_lengkap) {
+function sendApprovalEmail($email, $nama_lengkap, $nis, $jurusan, $kelas, $alasan, $tanggal_pengajuan, $tanggal_akhir) {
     $mail = new PHPMailer(true);
     try {
         // Konfigurasi SMTP
         $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com'; // Alamat SMTP server
+        $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'adriansyahsumitra@gmail.com'; // Alamat email Anda
-        $mail->Password = 'kivu njcw rcam nkwl'; // Kata sandi email Anda
+        $mail->Username = 'adriansyahsumitra@gmail.com';
+        $mail->Password = 'kivu njcw rcam nkwl';
         $mail->SMTPSecure = 'tls';
         $mail->Port = 587;
-        $mail->SMTPDebug = 3; // Gunakan level debug 3 atau 4 untuk output lebih terperinci
 
         // Pengaturan penerima
         $mail->setFrom('adriansyahsumitra@gmail.com', 'Admin');
@@ -36,7 +35,44 @@ function sendApprovalEmail($email, $nama_lengkap) {
         // Konten email
         $mail->isHTML(true);
         $mail->Subject = "Konfirmasi Persetujuan Pengajuan Dispensasi";
-        $mail->Body = "Halo $nama_lengkap,<br><br>Pengajuan dispensasi Anda telah disetujui. Anda dapat mengunduh surat dispensasi di akun Anda.<br><br>Terima kasih.";
+        
+        // Template email dalam HTML
+        $mail->Body = "
+        <p>Halo <b>$nama_lengkap</b>,</p>
+        <p>Berikut merupakan data dispensasi yang telah disetujui:</p>
+        <table style='border-collapse: collapse; width: 40%;'>
+            <tr>
+                <td style='font-weight: bold;'>Nama</td>
+                <td>: $nama_lengkap</td>
+            </tr>
+            <tr>
+                <td style='font-weight: bold;'>NIS</td>
+                <td>: $nis</td>
+            </tr>
+            <tr>
+                <td style='font-weight: bold;'>Jurusan</td>
+                <td>: $jurusan</td>
+            </tr>
+            <tr>
+                <td style='font-weight: bold;'>Kelas</td>
+                <td>: $kelas</td>
+            </tr>
+            <tr>
+                <td style='font-weight: bold;'>Keperluan</td>
+                <td>: $alasan</td>
+            </tr>
+            <tr>
+                <td style='font-weight: bold;'>Tanggal Mulai Pengajuan</td>
+                <td>: $tanggal_pengajuan</td>
+            </tr>
+            <tr>
+                <td style='font-weight: bold;'>Tanggal Akhir Pengajuan</td>
+                <td>: $tanggal_akhir</td>
+            </tr>
+        </table>
+        <br>
+        <p>Demikian keterangan dispensasi ini dibuat dengan sebenarnya untuk dapat digunakan sebagaimana mestinya.</p>
+        <p>Terimakasih.</p>";
 
         $mail->send();
         echo "Email berhasil dikirim.";
@@ -44,6 +80,7 @@ function sendApprovalEmail($email, $nama_lengkap) {
         echo "Email gagal dikirim. Error: {$mail->ErrorInfo}";
     }
 }
+
 
 // Cek apakah tombol "Setuju" atau "Tolak" diklik
 if (isset($_POST['approve']) || isset($_POST['reject'])) {
@@ -58,10 +95,28 @@ if (isset($_POST['approve']) || isset($_POST['reject'])) {
 
     // Jika disetujui, kirimkan email konfirmasi
     if ($status == 'disetujui') {
-        $email = $_POST['email'];
-        $nama_lengkap = $_POST['nama_lengkap'];
-        sendApprovalEmail($email, $nama_lengkap);
+        // Ambil data terbaru dari database
+        $query = "SELECT * FROM pengajuan WHERE id = ?";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $pengajuan = $result->fetch_assoc();
+
+        // Kirim email
+        sendApprovalEmail(
+            $pengajuan['email'],
+            $pengajuan['nama_lengkap'],
+            $pengajuan['nis'],
+            $pengajuan['jurusan'],
+            $pengajuan['kelas'],
+            $pengajuan['alasan'],
+            $pengajuan['tanggal_pengajuan'],
+            $pengajuan['tanggal_akhir']
+        );
     }
+
+    
 
     // Redirect ulang halaman untuk menghindari pengiriman ulang form
     header("Location: detail_pengajuan.php?id=$id");
@@ -86,6 +141,25 @@ if (!$pengajuan) {
     echo "Pengajuan tidak ditemukan.";
     exit();
 }
+$statusMap = [
+    'pending' => 'Menunggu Persetujuan',
+    'disetujui' => 'Disetujui',
+    'ditolak' => 'Ditolak'
+];
+
+$statusClass = '';
+$statusText = '';
+
+if ($pengajuan['status'] == 'pending') {
+    $statusClass = 'status-belum-diproses';
+} elseif ($pengajuan['status'] == 'disetujui') {
+    $statusClass = 'status-disetujui';
+} elseif ($pengajuan['status'] == 'ditolak') {
+    $statusClass = 'status-ditolak';
+}
+
+$statusText = $statusMap[$pengajuan['status']];
+
 ?>
 
 <!DOCTYPE html>
@@ -96,6 +170,8 @@ if (!$pengajuan) {
     <title>SUDISMA - Dispensasi</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         body {
             background-color: #a3c1e0;
@@ -160,61 +236,120 @@ if (!$pengajuan) {
     cursor: pointer;
 }
 
-/* Gaya status badge */
 .status-badge {
-    padding: 5px 10px;
-    font-size: 0.8em;
-    border-radius: 15px;
-    color: white;
-    display: inline-block;
-    font-weight: bold;
-}
+            display: inline-block;  /* Ubah dari inline ke inline-block */
+            padding: 3px 8px;  /* Padding lebih besar agar lebih terlihat */
+            font-size: 1em;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            margin: 0;
+            font-size: 0.9em;
+            margin-right: 1900px;
+            white-space: nowrap;
+            width: auto !important;  /* Menyesuaikan lebar dengan konten status */
+            display: inline-block !important;
+        }
+        .status-disetujui {
+            background-color: #267739; /* Warna hijau lebih muda */
+        }
 
-.status-belum-diproses {
-    background-color: orange;
-}
+        .status-ditolak {
+            background-color: #b5364f; /* Warna merah lebih cerah */
+        }
 
-.status-disetujui {
-    background-color: green;
-}
+        .status-belum-diproses {
+            background-color: #cc7a00; /* Warna oranye lebih cerah */
+        }
+       
+        .btn.approve {
+            background-color: green;
+            color: white;
+        }
+        .btn-success {
+            background-color: #28a745;
+            border: none;
+            border-radius: 20px; /* Tombol melengkung */
+            padding: 8px 20px;
+            font-size: 0.9em;
+        }
 
-.status-ditolak {
-    background-color: red;
-}
+        .btn-danger {
+            background-color: #dc3545;
+            border: none;
+            border-radius: 20px; /* Tombol melengkung */
+            padding: 8px 20px;
+            font-size: 0.9em;
+        }
+        .btn.reject {
+            background-color: red;
+            color: white;
+        }
+        .card {
+            max-width: 560px;
+            margin: 40px auto; /* Memberikan lebih banyak ruang di atas dan bawah */
+            padding: 30px;
+            background: white;
+            border-radius: 10px; /* Sudut melengkung */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Bayangan lembut */
+            border: 1px solid #ddd; /* Garis halus di sekitar */
+            font-family: 'Roboto', sans-serif; /* Font profesional */
+        }
+        .card-title {
+            font-size: 1.5em; /* Ukuran font judul */
+            font-weight: bold; /* Cetak tebal untuk judul */
+            color: #333; /* Warna teks judul */
+            text-align: center;
+        }
 
-/* Gaya tombol aksi */
-.btn-success {
-    background-color: green;
-    border-color: green;
-    font-size: 0.9em;
-}
+        .card-body {
+            line-height: 1.6; /* Meningkatkan spasi antar baris */
+            color: #555; /* Warna teks isi */
+        }
+        .back-button {
+            display: block;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .data-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
-.btn-danger {
-    background-color: red;
-    border-color: red;
-    font-size: 0.9em;
-}
-/* CSS untuk mengatur layout data dispensasi */
-.data-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px; /* Memberikan jarak antara setiap item */
-}
+        .data-list p {
+            display: flex;
+            align-items: center; /* Menyelaraskan vertikal */
+            justify-content: space-between;
+            margin: 0;
+            border-bottom: 1px solid #eee; /* Garis pembatas antar item */
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+        .data-list p:last-child {
+            border-bottom: none; /* Menghilangkan garis di item terakhir */
+        }
 
-.data-list p {
-    display: flex;
-    justify-content: space-between;
-    margin: 0;
-}
+        .data-list p strong {
+            flex: 0 0 42%;
+        }
 
-.data-list p strong {
-    width: 40%; /* Menentukan lebar label di sisi kiri */
-}
-
-.data-list p span, .data-list p a {
-    width: 60%; /* Menentukan lebar nilai di sisi kanan */
-}
-
+        .data-list p span, .data-list p a {
+            width: 60%;
+        }
+        
+        /* Responsiveness */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            #sidebarToggle {
+                display: inline-block;
+            }
+        }
     </style>
 </head>
 <body>
@@ -242,7 +377,7 @@ if (!$pengajuan) {
     <div class="sidebar bg-light p-3" id="sidebar">
         <h4 class="text-center">SUDISMA</h4>
         <div style="height: 40px;"></div>
-        <small class="text-muted ms-2">Menu</small>
+        <small class="text-muted ms-2" style="margin-top: 80px;">Menu</small>
         <nav class="nav flex-column mt-2">
             <a class="nav-link active d-flex align-items-center text-dark" href="dashboard_admin.php" style="color: black;">
                 <i class="bi bi-speedometer2 me-2"></i> Dashboard
@@ -251,10 +386,10 @@ if (!$pengajuan) {
                 <i class="bi bi-file-earmark-text me-2"></i> Dispensasi
             </a>
             <a class="nav-link d-flex align-items-center text-dark" href="list_angkatan.php" style="color: black;">
-                <i class="bi bi-file-earmark-text me-2"></i> Angkatan
+                <i class="bi bi-file-earmark-text me-2"></i> Kelas
             </a>
             <a class="nav-link d-flex align-items-center text-dark" href="list_dosen.php" style="color: black;">
-                <i class="bi bi-file-earmark-text me-2"></i> Dosen Penyetuju
+                <i class="bi bi-file-earmark-text me-2"></i> Guru Piket
             </a>
             <a class="nav-link d-flex align-items-center text-dark" href="list_tanggal.php" style="color: black;">
                 <i class="bi bi-file-earmark-text me-2"></i> Tanggal Pengajuan
@@ -268,31 +403,38 @@ if (!$pengajuan) {
     <div class="main-content">
         <div class="container">
             <div class="card shadow-sm border-0">
-                <h3 class="card-title text-center mb-3">List Data Dispensasi</h3>
+            <h3 class="card-title text-center mb-3">List Data Dispensasi</h3>
                 <div class="card-body">
-    <div class="data-list">
-        <p><strong>Nama:</strong> <span><?= htmlspecialchars($pengajuan['nama_lengkap']); ?></span></p>
-        <p><strong>NIM:</strong> <span><?= htmlspecialchars($pengajuan['nim']); ?></span></p>
-        <p><strong>Angkatan:</strong> <span><?= htmlspecialchars($pengajuan['angkatan']); ?></span></p>
-        <p><strong>Tanggal Pengajuan:</strong> <span><?= htmlspecialchars($pengajuan['tanggal_pengajuan']); ?></span></p>
-        <p><strong>Alasan:</strong> <span><?= htmlspecialchars($pengajuan['alasan']); ?></span></p>
-        <p><strong>Email:</strong> <span><?= htmlspecialchars($pengajuan['email']); ?></span></p>
-        <p><strong>Lampiran Dokumen:</strong> 
-            <span><?= $pengajuan['dokumen_lampiran'] ? '<a href="uploads/'.$pengajuan['dokumen_lampiran'].'" target="_blank"><i class="fas fa-file-alt fa-lg"></i></a>' : 'Tidak ada'; ?></span>
-        </p>
-        <p><strong>Status:</strong> 
-            <span class="status-badge 
-                <?= $pengajuan['status'] == '' ? 'status-belum-diproses' : 
-                    ($pengajuan['status'] == 'disetujui' ? 'status-disetujui' : 'status-ditolak'); ?>">
-                <?= $pengajuan['status'] == '' ? 'Belum diproses' : htmlspecialchars($pengajuan['status']); ?>
-            </span>
-        </p>
+                    <div class="data-list">
+                        <p><strong>Nama</strong> <span><strong>: </strong><?= htmlspecialchars($pengajuan['nama_lengkap']); ?></span></p>
+                        <p><strong>NIS</strong> <span><strong>: </strong><?= htmlspecialchars($pengajuan['nis']); ?></span></p>
+                        <p><strong>Kelas</strong> <span><strong>: </strong><?= htmlspecialchars($pengajuan['kelas']); ?></span></p>
+                        <p><strong>Tanggal Awal Dispensasi</strong> <span><strong>: </strong><?= htmlspecialchars($pengajuan['tanggal_pengajuan']); ?></span></p>
+                        <p><strong>Tanggal Akhir Dispensasi</strong> <span><strong>: </strong><?= htmlspecialchars($pengajuan['tanggal_akhir']); ?></span></p>
+                        <p><strong>Alasan</strong> <span><strong>: </strong><?= htmlspecialchars($pengajuan['alasan']); ?></span></p>
+                        <p><strong>Email</strong> <span><strong>: </strong><?= htmlspecialchars($pengajuan['email']); ?></span></p>
+                        <p><strong>Lampiran Dokumen</strong><span><strong>: </strong>
+                            <?php if (!empty($pengajuan['dokumen_lampiran'])): ?>
+                                <a href="uploads/<?= $pengajuan['dokumen_lampiran']; ?>" target="_blank" style="color: black;">
+                                    <i class="bi bi-file-earmark-text" style="font-size: 1.5rem;"></i>
+                                </a>
+                            <?php else: ?>
+                                Tidak ada
+                            <?php endif; ?>
+                        </span></p>    
+                        
+                        <p><strong>Status:</strong><span><strong>: </strong></span> 
+                        <span class="status-badge <?= $statusClass; ?>">
+                            <?= htmlspecialchars($statusText); ?>
+                        </span>
+                    </p>
         
     
     </div>
 
     <!-- Form untuk Setuju / Tolak -->
     <p><strong>Aksi:</strong>
+    <?php if ($pengajuan['status'] == 'pending'): ?>
         <form method="post" class="d-inline">
             <input type="hidden" name="id" value="<?= $pengajuan['id']; ?>">
             <input type="hidden" name="email" value="<?= $pengajuan['email']; ?>">
@@ -300,6 +442,13 @@ if (!$pengajuan) {
             <button type="submit" name="approve" class="btn btn-success btn-sm mx-1">Setuju</button>
             <button type="submit" name="reject" class="btn btn-danger btn-sm">Tidak</button>
         </form>
+    <?php elseif ($pengajuan['status'] == 'disetujui'): ?>
+        <!-- Tombol Cetak jika status disetujui -->
+        <a href="cetak_pengajuan.php?id=<?= $pengajuan['id']; ?>" class="btn btn-primary">Cetak</a>
+    <?php else: ?>
+        <!-- Tampilkan status jika ditolak -->
+        <span class="badge bg-danger">Pengajuan Ditolak</span>
+    <?php endif; ?>
     </p>
 </div>
 
