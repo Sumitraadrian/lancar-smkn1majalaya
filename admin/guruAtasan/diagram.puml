@@ -1,0 +1,47 @@
+@startuml
+
+title Activity Diagram - Pengembangan Sistem Informasi Pengajuan Dispensasi Siswa di SMK Negeri 1 Majalaya
+
+actor Siswa
+actor Admin
+
+Siswa -> (Akses Website)
+(Akses Website) --> (Tampilkan Form Pengajuan)
+Siswa -> (Isi Form Pengajuan)
+
+if (Form kosong?) then (Ya)
+  --> (Tampilkan Peringatan Harus Isi Semua Form)
+else (Tidak)
+  if (Ada script kode?) then (Ya)
+    --> (Tampilkan Peringatan Dilarang Mengirimkan Script Apapun)
+  else (Tidak)
+    if (Format tidak sesuai?) then (Ya)
+      --> (Tampilkan PeringatanFormat Tidak Sesuai)
+    else (Tidak)
+      --> (Simpan Pengajuan ke Database)
+    endif
+  endif
+endif
+
+Admin -> (Akses Halaman Dashboard)
+(Akses Halaman Dashboard) --> (Lihat List Pengajuan)
+Admin -> (Lihat Detail Pengajuan)
+
+if (Tindakan Disetujui?) then (Ya)
+  --> (Kirim Email Konfirmasi ke Siswa)
+  --> (Generate Surat Dispensasi)
+  --> (Pilih Penandatangan dan Input Nomor Surat)
+else (Tidak)
+  --> (Tandai Pengajuan Ditolak)
+endif
+
+Admin -> (CRUD Guru Piket dan Atasan Sekolah)
+Admin -> (Lihat Riwayat Pengajuan Disetujui)
+(Lihat Riwayat Pengajuan Disetujui) --> (Tentukan Rentang Tanggal)
+(Tentukan Rentang Tanggal) --> (Cetak Riwayat ke PDF)
+
+Admin -> (Akses Halaman Pengaturan)
+(Akses Halaman Pengaturan) --> (Edit Akun Admin)
+(Akses Halaman Pengaturan) --> (Edit Email Sistem dan SMTP)
+
+@enduml

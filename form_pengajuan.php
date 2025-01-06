@@ -41,76 +41,103 @@ function blockCodeInjection($input) {
 }
 
 // Validasi nama lengkap: hanya huruf, spasi, titik, koma, atau tanda hubung
+// Fungsi validasi
 function validateName($name) {
-    if (!preg_match('/^[a-zA-Z\s.,-]+$/', $name)) {
-        die('Error: Invalid name format.');
+    if (!preg_match('/^[a-zA-Z\s.,\-\'"]+$/', $name)) {
+        return 'Nama hanya boleh berisi huruf, spasi, titik, tanda kutip, atau tanda hubung.';
     }
-    return $name;
+    
+    return '';
 }
 
-// Validasi NIS: hanya angka
 function validateNIS($nis) {
     if (!ctype_digit($nis)) {
-        die('Error: Invalid NIS format.');
+        return 'NIS harus berupa angka.';
     }
-    return $nis;
+    return '';
 }
 
-// Validasi jurusan: hanya huruf, angka, dan spasi
 function validateJurusan($jurusan) {
     if (!preg_match('/^[a-zA-Z0-9\s]+$/', $jurusan)) {
-        die('Error: Invalid jurusan format.');
+        return 'Jurusan hanya boleh berisi huruf, angka, dan spasi.';
+
     }
-    return $jurusan;
+    return '';
 }
 
-// Validasi kelas: hanya alfanumerik
 function validateKelas($kelas) {
-    // Memastikan format seperti 'XI-TKJ 1' atau 'XI TKJ 1'
-    if (!preg_match('/^[A-Za-z]{2,3}[- ]?[A-Za-z]{3,4} \d+$/', $kelas)) {
-        die('Error: Invalid class format.');
-    }
-    return $kelas;
+    if (!preg_match('/^[A-Za-z0-9\s\-]+$/', $kelas)) {
+        return 'Format kelas tidak valid. Gunakan format seperti: X-TKJ 2.';
+    }    
+    return '';
 }
 
-
-// Validasi alasan: panjang minimal 10 dan maksimal 500 karakter
 function validateAlasan($alasan) {
     $length = strlen($alasan);
-    if ($length < 10 || $length > 500) {
-        die('Error: Reason must be between 10 and 500 characters.');
+    if ($length < 5 || $length > 500) {
+        return 'Alasan harus antara 5 hingga 500 karakter.';
     }
-    return $alasan;
+    
+    return '';
 }
 
-// Validasi nomor HP: hanya angka, tanda plus, dan tanda hubung
+function validateLokasi($lokasi) {
+    $length = strlen($lokasi);
+    if ($length < 5 || $length > 500) {
+        return 'Lokasi harus antara 5 hingga 500 karakter.';
+    }
+    return '';
+}
+
 function validatePhone($phone) {
     if (!preg_match('/^[0-9\-\+]+$/', $phone)) {
-        die('Error: Invalid phone number format.');
+        return 'Nomor telepon hanya boleh berisi angka';
     }
-    return $phone;
+    
+    return '';
 }
 
-// Validasi email: menggunakan filter_var
 function validateEmail($email) {
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        die('Error: Invalid email format.');
+        return 'Format email tidak valid.';
     }
-    return $email;
+    return '';
 }
 
+$errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validasi dan sanitasi input pengguna
-    $nama_lengkap = blockCodeInjection(validateName(sanitizeInput($_POST['nama_lengkap'])));
-    $nis = blockCodeInjection(validateNIS(sanitizeInput($_POST['nis'])));
-    $jurusan = blockCodeInjection(validateJurusan(sanitizeInput($_POST['jurusan'])));
-    $kelas = blockCodeInjection(validateKelas(sanitizeInput($_POST['kelas'])));
-    $alasan = blockCodeInjection(validateAlasan(sanitizeInput($_POST['alasan'])));
+    $nama_lengkap_clean = isset($_POST['nama_lengkap']) ? blockCodeInjection(sanitizeInput($_POST['nama_lengkap'])) : '';
+$errors['nama_lengkap'] = validateName($nama_lengkap_clean);
+
+$nis_clean = isset($_POST['nis']) ? blockCodeInjection(sanitizeInput($_POST['nis'])) : '';
+$errors['nis'] = validateNIS($nis_clean);
+
+$jurusan_clean = isset($_POST['jurusan']) ? blockCodeInjection(sanitizeInput($_POST['jurusan'])) : '';
+$errors['jurusan'] = validateJurusan($jurusan_clean);
+
+$kelas_clean = isset($_POST['kelas']) ? blockCodeInjection(sanitizeInput($_POST['kelas'])) : '';
+$errors['kelas'] = validateKelas($kelas_clean);
+
+$alasan_clean = isset($_POST['alasan']) ? blockCodeInjection(sanitizeInput($_POST['alasan'])) : '';
+$errors['alasan'] = validateAlasan($alasan_clean);
+
+$lokasi_clean = isset($_POST['lokasi']) ? blockCodeInjection(sanitizeInput($_POST['lokasi'])) : '';
+$errors['lokasi'] = validateLokasi($lokasi_clean);
+
     $tanggal_pengajuan = sanitizeInput($_POST['tanggal_pengajuan']);
     $tanggal_akhir = sanitizeInput($_POST['tanggal_akhir']);
-    $email = blockCodeInjection(validateEmail(filter_var($_POST['email'], FILTER_SANITIZE_EMAIL)));
-    $nohp = blockCodeInjection(validatePhone(sanitizeInput($_POST['nohp'])));
+    $email_clean = isset($_POST['email']) ? blockCodeInjection(sanitizeInput($_POST['email'])) : '';
+    $errors['email'] = validateEmail($email_clean);
+    
+    $nohp_clean = isset($_POST['nohp']) ? blockCodeInjection(sanitizeInput($_POST['nohp'])) : '';
+    $errors['nohp'] = validatePhone($nohp_clean);
+    
+ 
+      // Hapus pesan error yang kosong
+    $errors = array_filter($errors);
 
+    if (empty($errors)) {
     // Proses upload dokumen lampiran
     $lampiran_nama = null;
     if (isset($_FILES['dokumen_lampiran']) && $_FILES['dokumen_lampiran']['error'] === UPLOAD_ERR_OK) {
@@ -131,16 +158,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Siapkan query untuk menyimpan data ke database
-    $stmt = $conn->prepare("INSERT INTO pengajuan (user_id, nama_lengkap, nis, jurusan, kelas, alasan, tanggal_pengajuan, tanggal_akhir, email, nohp, dokumen_lampiran) 
+    $stmt = $conn->prepare("INSERT INTO pengajuan (nama_lengkap, nis, jurusan, kelas, alasan, lokasi, tanggal_pengajuan, tanggal_akhir, email, nohp, dokumen_lampiran) 
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-    $user_id = $_SESSION['user_id'] ?? null; // Ambil user_id dari session
+    
     $nama_lengkap = $conn->real_escape_string($nama_lengkap);
     $nis = $conn->real_escape_string($nis);
     $jurusan = $conn->real_escape_string($jurusan);
     $kelas = $conn->real_escape_string($kelas);
     $alasan = $conn->real_escape_string($alasan);
-    $stmt->bind_param("sssssssssss", $user_id, $nama_lengkap, $nis, $jurusan, $kelas, $alasan, $tanggal_pengajuan, $tanggal_akhir, $email, $nohp, $lampiran_nama);
+    $lokasi = $conn->real_escape_string($lokasi);
+    $stmt->bind_param("sssssssssss", $nama_lengkap_clean, $nis_clean, $jurusan_clean, $kelas_clean, $alasan_clean, $lokasi_clean, $tanggal_pengajuan, $tanggal_akhir, $email_clean, $nohp_clean, $lampiran_nama);
 
     // Eksekusi query dan tangani hasilnya
     if ($stmt->execute()) {
@@ -150,6 +178,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         echo "Error: " . $stmt->error;
     }
+}
+}
+// Cek status form dari tabel `form_status`
+$formStatusQuery = "SELECT status FROM form_status WHERE id = 1"; // Asumsikan ID 1 untuk form pengajuan
+$formStatusResult = $conn->query($formStatusQuery);
+
+if ($formStatusResult && $formStatusResult->num_rows > 0) {
+    $formStatusRow = $formStatusResult->fetch_assoc();
+    $formStatus = $formStatusRow['status'];
+} else {
+    $formStatus = 'inactive'; // Default jika tidak ada data
 }
 ?>
 
@@ -164,11 +203,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="image/logowebsite.png">
+    <link rel="icon" type="image/png" href="admin/image/logowebsite.png">
     <style>
-        .custom-bg {
-            background-color: #5393F3; /* Customize this color as desired */
-        }
+.custom-bg {
+    background: linear-gradient(135deg, rgb(164, 201, 255), rgb(110, 150, 210));
+    min-height: 100vh; /* Pastikan form tetap di tengah layar */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.alert {
+    position: flex;
+    top: 20px;
+    left: 50%;
+    bottom: 40px;
+    transform: translateX(-50%);
+    z-index: 1050;
+    width: auto;
+}
         body {
             font-family: 'Roboto', sans-serif;
         }
@@ -188,11 +240,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .card {
             border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1);
         }
 
         .card-body {
             padding: 30px;
+            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.1);
         }
 
         .form-control, .btn {
@@ -229,62 +282,149 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .modal-content {
             border-radius: 15px;
         }
+        
+        .bg-inactive {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, rgb(164, 201, 255), rgb(110, 150, 210));
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 800;
+}
+.text-inactive {
+    color: #fff;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+}
+#formExplanation {
+    font-size: 0.70rem; /* Ukuran font kecil */
+    margin-top: -10px; /* Atur jarak jika perlu */
+    margin-bottom: -30px;
+}
+
+
     </style>
 </head>
 <body>
+
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-        <div class="container-fluid">
-            <a class="navbar-brand text-dark" href="#">LANCAR</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                
-            </div>
+    <div class="container-fluid">
+        <a class="navbar-brand text-dark d-flex align-items-center" href="#">
+            <img src="admin/image/logowebsite.png" alt="Logo" style="height: 30px; margin-right: 10px;">
+            LANCAR
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            
         </div>
-    </nav>
+    </div>
+</nav>
+<?php if ($formStatus === 'inactive'): ?>
+    <div class="bg-inactive">
+    <div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
+    <div class="card text-white bg-danger" style="max-width: 30rem;">
+        <div class="card-body">
+            <h5 class="card-title">Form Pengajuan Tidak Aktif</h5>
+            <p class="card-text">Form pengajuan saat ini tidak aktif.</p>
+            <p class="card-text">Silakan kembali nanti atau hubungi admin untuk informasi lebih lanjut.</p>
+        </div>
+    </div>
+</div>
+
+    </div>
+<?php else: ?>
+
     <!-- Main Content -->
     <div class="content-wrapper custom-bg d-flex justify-content-center align-items-center" id="content">
         <div class="col-md-6 col-lg-5">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <h2 class="card-title text-center mb-4">Form Pengajuan Dispensasi</h2>
-                    <?php if (isset($_SESSION['status'])): ?>
-                        <div class="alert alert-success alert-dismissible fade show" role="alert" id="successMessage">
-                            <?php echo $_SESSION['status']; ?>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                        <script>
-                            // Automatically hide the success message after 5 seconds
-                            setTimeout(function() {
-                                document.getElementById('successMessage').classList.remove('show');
-                            }, 3000); // 5000 milliseconds = 5 seconds
-                        </script>
-                        <?php unset($_SESSION['status']); // Remove the message after displaying ?>
-                    <?php endif; ?>
+                
+                <div class="header-form" style="border: 1px solid #ddd; border-radius: 10px 10px 0 0; background-color: #f8f9fa; padding: 30px; margin: -30px -30px 0 -30px;">
+    <h2 class="card-title text-center mb-0" style="font-size: 1.8rem; color: #333;">Form Pengajuan Dispensasi</h2>
+</div>
+                <div class="text-left p-1 mb-4" id="formExplanationWrapper" style="border: 0px solid #ccc; border-radius: 5px; margin-top: 15px; background-color:#fff;">
+    <small id="formExplanation"  style="color: rgba(92, 92, 92, 0.6); font-size: 0.9rem;">
+        Untuk keperluan Ananda Ketika akan ada kegiatan keluar sekolah sehingga harus meninggalkan kegiatan belajar di kelas.
+    </small>
+</div>
+
+
+<?php if (isset($_SESSION['status'])): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert" id="successMessage">
+        <?php echo $_SESSION['status']; ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <script>
+        // Sembunyikan elemen formExplanation saat notifikasi muncul
+        document.getElementById('formExplanationWrapper').style.display = 'none';
+
+        // Hapus notifikasi setelah 5 detik dan tampilkan kembali formExplanation
+        setTimeout(function() {
+            let successMessage = document.getElementById('successMessage');
+            if (successMessage) {
+                successMessage.classList.remove('show');
+                setTimeout(() => {
+                    successMessage.remove();
+                    document.getElementById('formExplanationWrapper').style.display = 'block';
+                }, 500); // Hapus elemen dari DOM
+            }
+        }, 5000);
+    </script>
+    <?php unset($_SESSION['status']); ?>
+<?php endif; ?>
 
                     <form id="dispensasiForm" method="POST" action="" enctype="multipart/form-data">
                         <div class="mb-3">
                             <label for="nama_lengkap" class="form-label">Nama Lengkap Siswa</label>
                             <input type="text" name="nama_lengkap" class="form-control" placeholder="Nama Lengkap" required>
+                            <?php if (isset($errors['nama_lengkap'])): ?>
+                                <small class="text-danger"><?php echo $errors['nama_lengkap']; ?></small>
+                            <?php endif; ?>
                         </div>
                         <div class="mb-3">
                             <label for="nis" class="form-label">Nomor Induk Siswa (NIS)</label>
                             <input type="text" name="nis" class="form-control" placeholder="Nomor Induk Siswa (NIS)" required>
+                            <?php if (isset($errors['nis'])): ?>
+                                <small class="text-danger"><?php echo $errors['nis']; ?></small>
+                            <?php endif; ?>
                         </div>
                         <div class="mb-3">
                             <label for="jurusan" class="form-label">Jurusan</label>
                             <input type="text" name="jurusan" class="form-control" placeholder="Jurusan" required>
+                            <?php if (isset($errors['jurusan'])): ?>
+                                <small class="text-danger"><?php echo $errors['jurusan']; ?></small>
+                            <?php endif; ?>
                         </div>
                         <div class="mb-3">
                             <label for="kelas" class="form-label">Kelas</label>
-                            <input type="text" name="kelas" class="form-control" placeholder="Kelas" required>
+                            <input type="text" name="kelas" class="form-control" placeholder="Kelas (Misalkan: X-TKJ-1)" required>
+                            <?php if (isset($errors['kelas'])): ?>
+                            <small class="text-danger"><?php echo $errors['kelas']; ?></small>
+                        <?php endif; ?>
                         </div>
                 
                         <div class="mb-3">
                             <label for="alasan" class="form-label">Keperluan Pengajuan</label>
                             <textarea name="alasan" class="form-control" placeholder="Alasan Pengajuan" required></textarea>
+                            <?php if (isset($errors['alasan'])): ?>
+                                <small class="text-danger"><?php echo $errors['alasan']; ?></small>
+                            <?php endif; ?>
+                        </div>
+                        <div class="mb-3">
+                            <label for="lokasi" class="form-label">Lokasi/Tempat Kegiatan</label>
+                            <textarea name="lokasi" class="form-control" placeholder="Lokasi/Tempat Kegiatan" required></textarea>
+                            <?php if (isset($errors['lokasi'])): ?>
+                                <small class="text-danger"><?php echo $errors['lokasi']; ?></small>
+                            <?php endif; ?>
                         </div>
                         <div class="mb-3">
                             <label for="tanggal_pengajuan" class="form-label">Tanggal Mulai Dispensasi</label>
@@ -297,13 +437,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="mb-3">
                             <label for="email" class="form-label">Email</label>
                             <input type="email" name="email" class="form-control" placeholder="Email" required>
+                            <?php if (isset($errors['email'])): ?>
+                                <small class="text-danger"><?php echo $errors['email']; ?></small>
+                            <?php endif; ?>
                         </div>
                         <div class="mb-3">
                             <label for="nohp" class="form-label">No.HP (No.Whatsapp)</label>
                             <input type="nohp" name="nohp" class="form-control" placeholder="No.Hp (No. Whatsapp)" required>
+                            <?php if (isset($errors['nohp'])): ?>
+                                <small class="text-danger"><?php echo $errors['nohp']; ?></small>
+                            <?php endif; ?>
                         </div>
                         <div class="mb-3">
                             <label for="dokumen_lampiran" class="form-label">Lampiran Dokumen</label>
+                            <div class="form-text">Hanya Format PDF maksimal 2 MB</div>
                             <input type="file" name="dokumen_lampiran" class="form-control" placeholder="Email" required>
                         </div>
                         <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#confirmModal">Simpan Data</button>
@@ -339,7 +486,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 </div>
-    
+<?php endif; ?>
 <!-- Modal Error -->
 <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -436,7 +583,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             document.getElementById("content").classList.toggle("expanded");
         });
         
-        
+        document.addEventListener('DOMContentLoaded', function () {
+        const successMessage = document.getElementById('successMessage');
+        const formExplanation = document.getElementById('formExplanation');
+
+        if (successMessage) {
+            // Sembunyikan teks penjelasan jika alert muncul
+            formExplanation.style.display = 'none';
+
+            // Hapus alert dan tampilkan kembali teks penjelasan setelah 5 detik
+            setTimeout(function () {
+                successMessage.classList.remove('show');
+                setTimeout(() => {
+                    successMessage.remove();
+                    formExplanation.style.display = 'block';
+                }, 500); // Tunggu animasi fade out
+            }, 5000);
+        }
+    });
     </script>
 </body>
 </html>
